@@ -170,6 +170,7 @@ body {
   text-align: center;
   margin-left: auto;
   margin-right: auto;
+  padding: 0 32px
 }
 
 .footer a {
@@ -179,5 +180,8 @@ body {
 @media screen and (max-width: 980px) {
   .search {
     width: 80%;
+  }
+  .footer { 
+    margin-top: -8vh;
   }
 }
