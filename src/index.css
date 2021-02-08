@@ -6,24 +6,39 @@
   padding: 0;
 }
 
+html {
+  height: 100%;
+  width: 100%;
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   background: url('https://source.unsplash.com/collection/391148/1920x1080') no-repeat #000000;
   overflow-x: hidden;
+  height: 100%;
+  width: 100%;
 }
 
 .background-banner {
-  position: absolute;
+  position: fixed;
   display: block;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
 }
 
-.container::before {
+/* .container::before {
   content: "";
   display: block;
   height: 25vh;
+} */
+
+.container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%
 }
 
 .search {
@@ -33,6 +48,11 @@ body {
   border-radius: 8px;
   background: #ffffff;
   border: 2px solid #000000;
+}
+
+.search.straight {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
 }
 
 .search .search-bar {
@@ -84,12 +104,20 @@ body {
   max-height: 300px;
   overflow: auto;
   background: #ffffff;
-  margin-top: 18px;
   margin-left: -2px;
   border: 2px solid #000000;
+  border-top: none;
   border-radius: 8px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
   cursor: pointer;
   box-shadow: 0 20px 20px rgba(0, 0, 0, 0.15);
+  display: none;
+  scroll-behavior: smooth;
+}
+
+.search .result-popup.show {
+  display: block;
 }
 
 .search .result-popup .result-list:hover {
@@ -97,8 +125,13 @@ body {
 }
 
 .search .result-popup .result-list {
-  padding: 10px 10px;
+  padding: 10px 10px 10px 53px;
   border-top: 1px solid #eeeeee;
+  display: flex;
+}
+
+.search .result-popup .result-list.selected {
+  background: #eeeeee;
 }
 
 .main-content{
@@ -127,8 +160,22 @@ body {
   scroll-behavior: smooth;
 }
 
+.horizontal-scroller::-webkit-scrollbar {
+  width: 5px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0);
+}
+
+.horizontal-scroller::-webkit-scrollbar-thumb {
+  background: #aaaaaa;
+}
+
 .horizontal-scroller:hover {
   scrollbar-color: #aaaaaa rgba(255, 255, 255, 0.15);
+}
+
+.horizontal-scroller:hover::-webkit-scrollbar {
+  background: rgba(255, 255, 255, 0.15)
 }
 
 .weather-card {
@@ -170,7 +217,8 @@ body {
   text-align: center;
   margin-left: auto;
   margin-right: auto;
-  padding: 0 32px
+  padding: 0 32px;
+  margin-bottom: 10px;
 }
 
 .footer a {
@@ -180,8 +228,5 @@ body {
 @media screen and (max-width: 980px) {
   .search {
     width: 80%;
-  }
-  .footer { 
-    margin-top: -8vh;
   }
 }

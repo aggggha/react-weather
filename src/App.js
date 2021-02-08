@@ -14,7 +14,7 @@ function App() {
     }
 
     getLocationlist();
-  })
+  }, [])
 
   const getLocation = async () => {
     const res = await fetch(`${APIEndpoint}/wilayah.json`);
@@ -28,29 +28,32 @@ function App() {
     const data = await res.json();
 
     setWeatherList(data);
+    document.querySelector('.horizontal-scroller').scrollTo(0, 0);
   }
 
   return (
     <div className='App'>
       <div className='background-banner'></div>
       <div className='container'>
-        <SearchBar locations={locationList.length > 0 && locationList} onLocationChange={getWeather} />
-        <center className='main-content'>
-          {weather.length > 0 ? (
-            <>
-              <h3>Tiap Jam</h3>
-              <div className='horizontal-scroller'>
-                <WeatherCard weather={weather} />
-              </div>
-            </>
-          ) : (<h3>Halo! Untuk memulai, silakan masukkan lokasi Anda.</h3>)}
-        </center>
+        <div>
+          <SearchBar locations={locationList.length > 0 && locationList} onLocationChange={getWeather} />
+          <center className='main-content'>
+            {weather.length > 0 ? (
+              <>
+                <h3>Tiap Jam</h3>
+                <div className='horizontal-scroller'>
+                  <WeatherCard weather={weather} />
+                </div>
+              </>
+            ) : (<h3>Halo! Untuk memulai, silakan masukkan lokasi Anda.</h3>)}
+          </center>
+        </div>
+        <footer className='footer'>
+          <p>
+            Gambar oleh <a href="https://www.unsplash.com/" target='_blank' rel='noreferrer'>Unsplash</a> | API oleh <a href="https://github.com/ibnux" target='_blank' rel='noreferrer'>ibnux</a> | Data oleh <a href="https://data.bmkg.go.id/" target='_blank' rel='noreferrer'>Badan Meteorologi, Klimatologi dan Geofisika (BMKG)</a>
+          </p>
+        </footer>
       </div>
-      <footer className='footer'>
-        <p>
-          Gambar oleh <a href="https://www.unsplash.com/" target='_blank' rel='noreferrer'>Unsplash</a> | API oleh <a href="https://github.com/ibnux" target='_blank' rel='noreferrer'>ibnux</a> | Data oleh <a href="https://data.bmkg.go.id/" target='_blank' rel='noreferrer'>Badan Meteorologi, Klimatologi dan Geofisika (BMKG)</a>
-        </p>
-      </footer>
     </div>
   );
 }
