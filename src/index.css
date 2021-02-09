@@ -76,6 +76,7 @@ body {
   background: transparent;
   font-family: 'Poppins', sans-serif;
   font-size: 1.05em;
+  padding-right: 15px;
 }
 
 .search .search-bar .input-text.padding {
@@ -118,6 +119,7 @@ body {
 
 .search .result-popup.show {
   display: block;
+  animation: result-popup-anim cubic-bezier(0, 1, 0, 1) 1s;
 }
 
 .search .result-popup .result-list:hover {
@@ -158,6 +160,7 @@ body {
   scrollbar-color: #aaaaaa rgba(255, 255, 255, 0);
   scrollbar-width: thin;
   scroll-behavior: smooth;
+  animation: weather-card-anim cubic-bezier(0, 1, 0, 1) 1s;
 }
 
 .horizontal-scroller::-webkit-scrollbar {
@@ -208,7 +211,7 @@ body {
 }
 
 .weather-card .weather-icon.hujan-lebat, .weather-card .weather-icon.hujan-petir {
-  background-position: -300px 0;
+  background-position: -450px 0;
 }
 
 .footer {
@@ -225,8 +228,41 @@ body {
   color: #00d9ff;
 }
 
+/* Responsive */
+
 @media screen and (max-width: 980px) {
   .search {
     width: 80%;
+  }
+}
+
+@media screen and (max-width: 979px) {
+  .container {
+    padding: 30px 0;
+    position: relative;
+    top: unset;
+    left: unset;
+    transform: unset;
+  }
+}
+
+/* Animation list */
+@keyframes weather-card-anim {
+  from {
+    opacity: 0;
+    margin-left: 100px;
+  }
+  to {
+    opacity: 1;
+    margin-left: 0;
+  }
+}
+
+@keyframes result-popup-anim {
+  from {
+    max-height: 200px;
+  }
+  to {
+    max-height: 300px;
   }
 }

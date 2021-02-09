@@ -5,6 +5,7 @@ import LocationList from './LocationList';
 const SearchBar = ({ locations, onLocationChange }) => {
     const [textInput, setTextInput] = useState('');
     const [locationList, setLocationList] = useState([]);
+    const [isNoResult, setIsNoResult] = useState(0);
     const textInputLoc = useRef(null);
 
     // Search suggestion
@@ -42,7 +43,7 @@ const SearchBar = ({ locations, onLocationChange }) => {
                     if (listPosition.offsetTop === suggestionContainer.firstElementChild.offsetTop) {
                         suggestionContainer.scrollTo(0, suggestionContainer.lastElementChild.offsetTop);
                     } else {
-                        suggestionContainer.scrollTo(0, listPosition.offsetTop - 46);
+                        suggestionContainer.scrollTo(0, listPosition.offsetTop - listPosition.offsetHeight);
                     }
                 }
             } else if (e.keyCode === 13) {
@@ -55,6 +56,7 @@ const SearchBar = ({ locations, onLocationChange }) => {
                 onLocationChange(currentLocation[0].id);
                 document.querySelector('.input-text').blur();
                 setHoveredItem(undefined);
+                setIsNoResult(0);
             }
         }
     }
@@ -66,11 +68,18 @@ const SearchBar = ({ locations, onLocationChange }) => {
     const filterList = (value) => {
         setTextInput(value);
 
-        if (value.length > 0) {
-            const filteredLocation = locations.filter((location) =>
+        if (value.length > 0 && locations.length > 0) {
+            const filteredLocation = locations.filter((location) => 
                 location.kota.toLowerCase().includes(value.toLowerCase())
             );
-            setLocationList(filteredLocation);
+
+            if (filteredLocation.length === 0) {
+                setIsNoResult(1);
+                setLocationList([]);
+            } else {
+                setIsNoResult(0);
+                setLocationList(filteredLocation);
+            }
         } else {
             setLocationList([]);
         }
@@ -84,20 +93,25 @@ const SearchBar = ({ locations, onLocationChange }) => {
         setLocationList([]);
         setTextInput(currentLocation[0].kota);
         onLocationChange(id);
+        setIsNoResult(0);
     }
 
     return (
-        <div className={`search ${locationList.length > 0 ? 'straight' : ''}`}>
+        <div className={`search ${(locationList.length > 0 || isNoResult === 1) ? 'straight' : ''}`}>
             <div className='search-bar'>
                 {textInput.length > 0 && <div className='pre-btn'><MdPlace /></div>}
                 <input type="text" value={textInput} placeholder='Pencarian...' className={`input-text ${textInput.length === 0 ? 'padding' : ''} `} onChange={(e) => filterList(e.target.value)} ref={textInputLoc} onFocus={(e) => e.target.select()} onKeyDown={(e) => keypressHandler(e)} />
                 {/* <button type="submit" className='gps-btn'><MdMyLocation /></button> */}
             </div>
 
-            <div className={`result-popup ${locationList.length > 0 && 'show'}`}>
-                {locationList.map((list, index) => (
-                    <LocationList key={list.id} value={list} onClick={clearAndSubmitLocation} index={index} active={index === hoveredItem} setHover={setHoveredItem} />
-                ))}
+            <div className={`result-popup ${(locationList.length > 0 || isNoResult === 1) && 'show'}`}>
+                {locationList.length > 0 ? (
+                    locationList.map((list, index) =>
+                        <LocationList key={list.id} value={list} onClick={clearAndSubmitLocation} index={index} active={index === hoveredItem} setHover={setHoveredItem} />
+                    )) : (
+                        <div className='result-list'>Lokasi tidak ditemukan</div>
+                    )
+                }
             </div>
         </div>
     )

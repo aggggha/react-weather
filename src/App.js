@@ -27,8 +27,9 @@ function App() {
     const res = await fetch(`${APIEndpoint}/${id}.json`);
     const data = await res.json();
 
+    setWeatherList([]);
     setWeatherList(data);
-    document.querySelector('.horizontal-scroller').scrollTo(0, 0);
+    document.querySelector('.horizontal-scroller') !== null && document.querySelector('.horizontal-scroller').scrollTo(0, 0);
   }
 
   return (
@@ -40,7 +41,7 @@ function App() {
           <center className='main-content'>
             {weather.length > 0 ? (
               <>
-                <h3>Tiap Jam</h3>
+                <h3>Prakiraan Cuaca Tiap Jam</h3>
                 <div className='horizontal-scroller'>
                   <WeatherCard weather={weather} />
                 </div>
@@ -50,7 +51,7 @@ function App() {
         </div>
         <footer className='footer'>
           <p>
-            Gambar oleh <a href="https://www.unsplash.com/" target='_blank' rel='noreferrer'>Unsplash</a> | API oleh <a href="https://github.com/ibnux" target='_blank' rel='noreferrer'>ibnux</a> | Data oleh <a href="https://data.bmkg.go.id/" target='_blank' rel='noreferrer'>Badan Meteorologi, Klimatologi dan Geofisika (BMKG)</a>
+            Gambar oleh <a href="https://www.unsplash.com/" target='_blank' rel='noreferrer'>Unsplash</a> | API oleh <a href="https://github.com/ibnux" target='_blank' rel='noreferrer'>ibnux</a> | Data oleh <a href="https://data.bmkg.go.id/" target='_blank' rel='noreferrer'>Badan Meteorologi, Klimatologi, dan Geofisika (BMKG)</a>
           </p>
         </footer>
       </div>
