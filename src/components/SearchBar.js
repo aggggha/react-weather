@@ -1,24 +1,26 @@
-import { MdPlace } from 'react-icons/md';
+import { MdPlace, MdClose } from 'react-icons/md';
 import { useState, useEffect, useRef } from 'react';
 import LocationList from './LocationList';
 
-const SearchBar = ({ locations, onLocationChange }) => {
+const SearchBar = ({ locations, isLoaded, onLocationChange, dismissAll }) => {
     const [textInput, setTextInput] = useState('');
-    const [locationList, setLocationList] = useState([]);
-    const [isNoResult, setIsNoResult] = useState(0);
+    const [result, setResult] = useState([]); // search result
+    const [isNoResult, setIsNoResult] = useState(false); // no result indicator
     const textInputLoc = useRef(null);
+    let i; // for highlighting search suggestion
 
     // Search suggestion
     const [hoveredItem, setHoveredItem] = useState(undefined);
     // const [selectedItem, setSelectedItem] = useState(undefined);
 
     const keypressHandler = (e) => {
-        if (locationList.length > 0) {
+        if (result.length > 0) {
             const listPosition = document.querySelector('.result-list.selected');
             const suggestionContainer = document.querySelector('.result-popup');
 
             if (e.keyCode === 40) {
-                if (hoveredItem === undefined || locationList.length - 1 === hoveredItem || locationList.length === 1) {
+                // console.log('down');
+                if (hoveredItem === undefined || i === hoveredItem || i === -1) {
                     setHoveredItem(0);
                     suggestionContainer.scrollTo(0, 0);
                 } else {
@@ -29,12 +31,12 @@ const SearchBar = ({ locations, onLocationChange }) => {
                     if (listPosition.offsetTop === suggestionContainer.lastElementChild.offsetTop) {
                         suggestionContainer.scrollTo(0, 0);
                     } else {
-                        suggestionContainer.scrollTo(0, listPosition.offsetTop);
+                        suggestionContainer.scrollTo(0, listPosition.offsetTop - (listPosition.offsetHeight * 2));
                     }
                 }
             } else if (e.keyCode === 38) {
                 if (hoveredItem === undefined || hoveredItem === 0) {
-                    setHoveredItem(locationList.length - 1);
+                    setHoveredItem(i);
                 } else {
                     setHoveredItem(hoveredItem - 1);
                 }
@@ -43,73 +45,107 @@ const SearchBar = ({ locations, onLocationChange }) => {
                     if (listPosition.offsetTop === suggestionContainer.firstElementChild.offsetTop) {
                         suggestionContainer.scrollTo(0, suggestionContainer.lastElementChild.offsetTop);
                     } else {
-                        suggestionContainer.scrollTo(0, listPosition.offsetTop - listPosition.offsetHeight);
+                        suggestionContainer.scrollTo(0, listPosition.offsetTop - (listPosition.offsetHeight * 3));
                     }
                 }
             } else if (e.keyCode === 13) {
-                const currentLocation = locationList.filter((list, index) =>
-                    index === hoveredItem && list
+                let j = -1;
+                const selectedLocation = result.map((list) => (
+                    list.filter((item) => {
+                        j++;
+                        return j === hoveredItem && item;
+                    })
+                ));
+
+                const selectedWeatherData = selectedLocation.filter((list) =>
+                    list.some(area => area.length !== 0)
                 );
 
-                setLocationList([]);
-                setTextInput(currentLocation[0].kota);
-                onLocationChange(currentLocation[0].id);
-                document.querySelector('.input-text').blur();
-                setHoveredItem(undefined);
-                setIsNoResult(0);
+                if (hoveredItem !== undefined) {
+                    setResult([]);
+                    setTextInput(selectedWeatherData[0][0].cityName);
+                    onLocationChange(selectedWeatherData[0][0].id, selectedWeatherData[0][0].province);
+                    setHoveredItem(undefined);
+                    document.querySelector('.input-text').blur();
+                    setIsNoResult(false);
+                }
             }
         }
+    }
+
+    const filterList = (value) => {
+        // isLoaded && console.log(locations);
+        setTextInput(value);
+        setHoveredItem(undefined);
+
+        if (value.length > 0 && isLoaded) {
+            const filteredLocList = locations.map((location) =>
+                location.data.filter((list) =>
+                    list.cityName !== undefined && list.cityName.toLowerCase().includes(value.toLowerCase())
+                )
+            );
+
+            const lists = filteredLocList.filter((list) =>
+                list.some(area => area.length !== 0)
+            );
+
+            if (lists.length === 0) {
+                setIsNoResult(true);
+                setResult([]);
+            } else {
+                setIsNoResult(false);
+                setResult(lists);
+            }
+        } else {
+            setResult([]);
+            setHoveredItem(undefined);
+            setIsNoResult(false);
+        }
+    }
+
+    const clearAndSubmitLocation = (id, cityName, province) => {
+        setResult([]);
+        setTextInput(cityName);
+        onLocationChange(id, province);
+        setIsNoResult(false);
+        setHoveredItem(undefined);
+    }
+
+    const clearSearch = () => {
+        setResult([]);
+        setTextInput('');
+        setIsNoResult(false);
+        setHoveredItem(undefined);
+        dismissAll();
     }
 
     useEffect(() => {
         textInputLoc.current.focus();
     }, []);
 
-    const filterList = (value) => {
-        setTextInput(value);
-
-        if (value.length > 0 && locations.length > 0) {
-            const filteredLocation = locations.filter((location) => 
-                location.kota.toLowerCase().includes(value.toLowerCase())
-            );
-
-            if (filteredLocation.length === 0) {
-                setIsNoResult(1);
-                setLocationList([]);
-            } else {
-                setIsNoResult(0);
-                setLocationList(filteredLocation);
-            }
-        } else {
-            setLocationList([]);
-        }
-    }
-
-    const clearAndSubmitLocation = (id) => {
-        const currentLocation = locations.filter((location) =>
-            location.id.includes(id)
-        );
-
-        setLocationList([]);
-        setTextInput(currentLocation[0].kota);
-        onLocationChange(id);
-        setIsNoResult(0);
-    }
-
     return (
-        <div className={`search ${(locationList.length > 0 || isNoResult === 1) ? 'straight' : ''}`}>
+        <div className={`search ${!isLoaded ? 'straight' : ''} ${(result.length > 0 || isNoResult) ? 'straight' : ''}`}>
             <div className='search-bar'>
                 {textInput.length > 0 && <div className='pre-btn'><MdPlace /></div>}
-                <input type="text" value={textInput} placeholder='Pencarian...' className={`input-text ${textInput.length === 0 ? 'padding' : ''} `} onChange={(e) => filterList(e.target.value)} ref={textInputLoc} onFocus={(e) => e.target.select()} onKeyDown={(e) => keypressHandler(e)} />
-                {/* <button type="submit" className='gps-btn'><MdMyLocation /></button> */}
+                <input type="text" value={textInput} placeholder='Pencarian...' className={`input-text ${textInput.length === 0 ? 'padding' : ''}`} ref={textInputLoc} onFocus={(e) => e.target.select()} onChange={(e) => filterList(e.target.value)} onKeyDown={(e) => keypressHandler(e)} />
+                {textInput.length > 0 && <button className='post-btn' onClick={clearSearch}><MdClose /></button>}
             </div>
 
-            <div className={`result-popup ${(locationList.length > 0 || isNoResult === 1) && 'show'}`}>
-                {locationList.length > 0 ? (
-                    locationList.map((list, index) =>
-                        <LocationList key={list.id} value={list} onClick={clearAndSubmitLocation} index={index} active={index === hoveredItem} setHover={setHoveredItem} />
-                    )) : (
-                        <div className='result-list'>Lokasi tidak ditemukan</div>
+            <div className={`result-popup ${!isLoaded && 'show'} ${(result.length > 0 || isNoResult) && 'show'}`}>
+                {result.length > 0 ? (i = -1,
+                    result.map((list) => (
+                        list.map((item) => {
+                            i++;
+                            return (
+                                <LocationList key={i} value={item} index={i} active={i === hoveredItem} setHover={setHoveredItem} onClick={clearAndSubmitLocation} />
+                            );
+                        })
+                    ))) : (
+                        (!isLoaded || !isNoResult) ? (
+                            <div className='result-list'>Memuat data lokasi...</div>
+                        ) : (
+                                <div className='result-list'>Lokasi tidak ditemukan</div>
+                            )
                     )
                 }
             </div>
