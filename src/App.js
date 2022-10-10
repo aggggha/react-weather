@@ -19,7 +19,13 @@ function App() {
   useEffect(() => {
     const getLocationlist = async () => {
       for (let i = 0; i < provinces.length; i++) {
-        const res = await fetch(`${URLEndpoint}${provinces[i]}.xml`);
+        const res = await fetch(`${URLEndpoint}${provinces[i]}.xml`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/xml',
+          },
+          mode: 'cors',
+        });
         const resText = await res.text();
         const resJSON = XMLParser.parse(resText, options); // validator is false
         const locations = resJSON.data.forecast.area.map((location) =>
